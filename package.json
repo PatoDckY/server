@@ -1,9 +1,9 @@
 {
   "name": "servidor",
   "version": "1.0.0",
-  "description": "",
+  "description": "Backend server for FishCare project",
   "license": "ISC",
-  "author": "",
+  "author": "Your Name <your.email@example.com>",
   "type": "commonjs",
   "main": "server.js",
   "scripts": {
@@ -12,10 +12,20 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "mongoose": "^8.12.1",
+    "mongoose": "^8.12.1"
+  },
+  "devDependencies": {
     "nodemon": "^3.1.9"
+  },
+  "engines": {
+    "node": "18.x"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/PatoDckY/Vercel.git"
   }
 }
