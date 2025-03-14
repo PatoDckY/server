@@ -33,6 +33,5 @@ app.use("/soporte", SoporteRoutes);
 app.use("/guia", GuiaRoutes);
 app.use("/buscar", busqueda);
 
-// Iniciar el servidor
-const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Servidor corriendo en http://localhost:${PORT}`));
+// Export the app for Vercel
+module.exports = app;
