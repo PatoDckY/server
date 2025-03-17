@@ -83,7 +83,7 @@ router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
         res.status(500).json({ message: "Error al eliminar producto" });
     }
 });
-// 📌 Actualizar nombre e IP de un dispositivo
+// 📌 Actualizar nombre e IP de un dispositivo (modificado)
 router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
     const { usuario_id, producto_id } = req.params;
     const { nombre, ip } = req.body;
@@ -110,9 +110,9 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
             return res.status(404).json({ message: "Producto no encontrado" });
         }
 
-        // Actualizar los campos nombre e ip
-        dispositivo.nombre = nombre || dispositivo.nombre; // Si no se pasa un nombre, mantiene el valor actual
-        dispositivo.ip = ip || dispositivo.ip; // Lo mismo para la IP
+        // Actualizar los campos nombre e ip solo si se proporcionan
+        if (nombre) dispositivo.nombre = nombre;
+        if (ip) dispositivo.ip = ip;
 
         await usuario.save();
         res.json({ message: "Producto actualizado con éxito" });
@@ -122,6 +122,7 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
         res.status(500).json({ message: "Error al actualizar producto" });
     }
 });
+
 // 📌 Actualizar nombre e IP de un dispositivo
 router.put("/actualizar/:producto_id", async (req, res) => {
     const { producto_id } = req.params;
@@ -168,22 +169,21 @@ router.get("/detalles/:producto_id", async (req, res) => {
     }
 
     try {
+        // Buscar el dispositivo usando ObjectId
         const dispositivo = await DispositivoUsuario.aggregate([
             { $unwind: "$dispositivos" },
             { $match: { "dispositivos.producto_id": mongoose.Types.ObjectId(producto_id) } },
             { $project: { nombre: "$dispositivos.nombre", ip: "$dispositivos.ip" } }
         ]);
 
-        if (dispositivo.length === 0) {
+        if (!dispositivo || dispositivo.length === 0) {
             return res.status(404).json({ message: "Dispositivo no encontrado" });
         }
 
-        // Responder con los datos del dispositivo
-        res.json(dispositivo[0]);
-
+        res.json(dispositivo[0]); // Regresar el primer dispositivo encontrado
     } catch (error) {
-        console.error("Error al obtener detalles del dispositivo:", error);
-        res.status(500).json({ message: "Error al obtener dispositivo" });
+        console.error(error);
+        res.status(500).json({ message: "Error al obtener detalles del dispositivo" });
     }
 });
 
