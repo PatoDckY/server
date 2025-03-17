@@ -158,6 +158,35 @@ router.put("/actualizar/:producto_id", async (req, res) => {
         res.status(500).json({ message: "Error al actualizar dispositivo" });
     }
 });
+// 📌 Obtener detalles de un dispositivo por su ID (para verificar si tiene nombre e IP)
+router.get("/detalles/:producto_id", async (req, res) => {
+    const { producto_id } = req.params;
+
+    // Validar ObjectId
+    if (!mongoose.Types.ObjectId.isValid(producto_id)) {
+        return res.status(400).json({ message: "ID de producto no válido" });
+    }
+
+    try {
+        // Buscar el dispositivo en la base de datos
+        const dispositivo = await DispositivoUsuario.aggregate([
+            { $unwind: "$dispositivos" },
+            { $match: { "dispositivos.producto_id": mongoose.Types.ObjectId(producto_id) } },
+            { $project: { nombre: "$dispositivos.nombre", ip: "$dispositivos.ip" } }
+        ]);
+
+        if (dispositivo.length === 0) {
+            return res.status(404).json({ message: "Dispositivo no encontrado" });
+        }
+
+        // Devolver los detalles del dispositivo
+        res.json(dispositivo[0]);
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al obtener dispositivo" });
+    }
+});
 
 
 
