@@ -22,7 +22,12 @@ router.post("/agregar", async (req, res) => {
             // Si no existe, creamos un nuevo documento para el usuario con el primer dispositivo
             usuario = new DispositivoUsuario({
                 usuario_id,
-                dispositivos: [{ producto_id, estado: "activo" }]
+                dispositivos: [{
+                    producto_id,
+                    estado: "activo",
+                    ip: null, // IP vacía
+                    nombre: null // Nombre vacío
+                }]
             });
         } else {
             // Verificar si el producto ya está agregado y activo
@@ -33,7 +38,12 @@ router.post("/agregar", async (req, res) => {
             }
 
             // Agregar el producto al array con estado "activo"
-            usuario.dispositivos.push({ producto_id, estado: "activo" });
+            usuario.dispositivos.push({
+                producto_id,
+                estado: "activo",
+                ip: null, // IP vacía
+                nombre: null // Nombre vacío
+            });
         }
 
         await usuario.save();
