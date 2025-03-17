@@ -12,8 +12,7 @@ const DispositivoUsuarioSchema = new mongoose.Schema({
             producto_id: { 
                 type: mongoose.Schema.Types.ObjectId, 
                 ref: "Producto", 
-                required: true,
-                index: true  // Agregar índice para optimizar consultas
+                required: true 
             },
             fecha_agregado: { 
                 type: Date, 
@@ -26,13 +25,11 @@ const DispositivoUsuarioSchema = new mongoose.Schema({
             },
             ip: { 
                 type: String, 
-                required: true, // Campo obligatorio
-                default: null // Inicialmente nulo si no se proporciona
+                default: null // Campo para la IP (inicialmente nulo)
             },
             nombre: { 
                 type: String, 
-                required: true, // Campo obligatorio
-                default: null // Inicialmente nulo si no se proporciona
+                default: null // Campo para el nombre (inicialmente nulo)
             }
         }
     ]

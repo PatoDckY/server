@@ -25,6 +25,7 @@ router.get("/:usuario_id", async (req, res) => {
         res.status(500).json({ message: "Error al obtener productos" });
     }
 });
+
 // 📌 Obtener todos los productos agregados por un usuario
 router.get("/:usuario_id", async (req, res) => {
     const { usuario_id } = req.params;
@@ -47,6 +48,7 @@ router.get("/:usuario_id", async (req, res) => {
         res.status(500).json({ message: "Error al obtener productos" });
     }
 });
+
 // 📌 Eliminar un producto de la lista del usuario
 router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
     const { usuario_id, producto_id } = req.params;
@@ -83,7 +85,7 @@ router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
         res.status(500).json({ message: "Error al eliminar producto" });
     }
 });
-// 📌 Actualizar nombre e IP de un dispositivo (modificado)
+// 📌 Actualizar nombre e IP de un dispositivo
 router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
     const { usuario_id, producto_id } = req.params;
     const { nombre, ip } = req.body;
@@ -110,9 +112,9 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
             return res.status(404).json({ message: "Producto no encontrado" });
         }
 
-        // Actualizar los campos nombre e ip solo si se proporcionan
-        if (nombre) dispositivo.nombre = nombre;
-        if (ip) dispositivo.ip = ip;
+        // Actualizar los campos nombre e ip
+        dispositivo.nombre = nombre || dispositivo.nombre; // Si no se pasa un nombre, mantiene el valor actual
+        dispositivo.ip = ip || dispositivo.ip; // Lo mismo para la IP
 
         await usuario.save();
         res.json({ message: "Producto actualizado con éxito" });
@@ -122,7 +124,6 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
         res.status(500).json({ message: "Error al actualizar producto" });
     }
 });
-
 // 📌 Actualizar nombre e IP de un dispositivo
 router.put("/actualizar/:producto_id", async (req, res) => {
     const { producto_id } = req.params;
@@ -160,42 +161,6 @@ router.put("/actualizar/:producto_id", async (req, res) => {
     }
 });
 
-// 📌 Verificar si los campos nombre e ip están llenos o son null
-router.get("/verificar-campos/:usuario_id", async (req, res) => {
-    const { usuario_id } = req.params;
-
-    // Validar ObjectId
-    if (!mongoose.Types.ObjectId.isValid(usuario_id)) {
-        return res.status(400).json({ message: "ID de usuario no válido" });
-    }
-
-    try {
-        const usuario = await DispositivoUsuario.findOne({ usuario_id });
-
-        if (!usuario) {
-            return res.status(404).json({ message: "Usuario no encontrado" });
-        }
-
-        // Verificar los campos nombre e ip en cada dispositivo
-        const dispositivosConCamposInvalidos = usuario.dispositivos
-            .filter(d => d.estado === "activo") // Solo dispositivos activos
-            .map(d => ({
-                producto_id: d.producto_id,
-                nombre: d.nombre,
-                ip: d.ip,
-                camposInvalidos: {
-                    nombre: d.nombre === null || d.nombre === "",
-                    ip: d.ip === null || d.ip === ""
-                }
-            }));
-
-        res.json(dispositivosConCamposInvalidos);
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al verificar campos" });
-    }
-});
 
 
 module.exports = router;
