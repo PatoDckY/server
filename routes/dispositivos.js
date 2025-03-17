@@ -159,35 +159,43 @@ router.put("/actualizar/:producto_id", async (req, res) => {
         res.status(500).json({ message: "Error al actualizar dispositivo" });
     }
 });
-// 📌 Obtener detalles de un dispositivo por su ID (para verificar si tiene nombre e IP)
-router.get("/detalles/:producto_id", async (req, res) => {
-    const { producto_id } = req.params;
+
+// 📌 Verificar si los campos nombre e ip están llenos o son null
+router.get("/verificar-campos/:usuario_id", async (req, res) => {
+    const { usuario_id } = req.params;
 
     // Validar ObjectId
-    if (!mongoose.Types.ObjectId.isValid(producto_id)) {
-        return res.status(400).json({ message: "ID de producto no válido" });
+    if (!mongoose.Types.ObjectId.isValid(usuario_id)) {
+        return res.status(400).json({ message: "ID de usuario no válido" });
     }
 
     try {
-        // Buscar el dispositivo usando ObjectId
-        const dispositivo = await DispositivoUsuario.aggregate([
-            { $unwind: "$dispositivos" },
-            { $match: { "dispositivos.producto_id": mongoose.Types.ObjectId(producto_id) } },
-            { $project: { nombre: "$dispositivos.nombre", ip: "$dispositivos.ip" } }
-        ]);
+        const usuario = await DispositivoUsuario.findOne({ usuario_id });
 
-        if (!dispositivo || dispositivo.length === 0) {
-            return res.status(404).json({ message: "Dispositivo no encontrado" });
+        if (!usuario) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
         }
 
-        res.json(dispositivo[0]); // Regresar el primer dispositivo encontrado
+        // Verificar los campos nombre e ip en cada dispositivo
+        const dispositivosConCamposInvalidos = usuario.dispositivos
+            .filter(d => d.estado === "activo") // Solo dispositivos activos
+            .map(d => ({
+                producto_id: d.producto_id,
+                nombre: d.nombre,
+                ip: d.ip,
+                camposInvalidos: {
+                    nombre: d.nombre === null || d.nombre === "",
+                    ip: d.ip === null || d.ip === ""
+                }
+            }));
+
+        res.json(dispositivosConCamposInvalidos);
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Error al obtener detalles del dispositivo" });
+        res.status(500).json({ message: "Error al verificar campos" });
     }
 });
-
-
 
 
 module.exports = router;
