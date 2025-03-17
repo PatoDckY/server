@@ -7,24 +7,24 @@ router.post("/agregar", async (req, res) => {
     const { usuario_id, producto_id } = req.body;
 
     try {
-        let usuario = await DispositivoUsuario.findById(usuario_id);
+        let usuario = await DispositivoUsuario.findOne({ usuario_id });
 
         if (!usuario) {
-            // Si no existe, creamos un nuevo documento para el usuario
+            // Si no existe, creamos un nuevo documento para el usuario con el primer dispositivo
             usuario = new DispositivoUsuario({
-                _id: usuario_id,
-                dispositivos: [{ producto_id }]
+                usuario_id,
+                dispositivos: [{ producto_id, estado: "activo" }]
             });
         } else {
-            // Verificar si el producto ya está agregado
+            // Verificar si el producto ya está agregado y activo
             const existe = usuario.dispositivos.some(d => d.producto_id.equals(producto_id) && d.estado === "activo");
 
             if (existe) {
                 return res.status(400).json({ message: "El producto ya está agregado" });
             }
 
-            // Agregar el producto al array
-            usuario.dispositivos.push({ producto_id });
+            // Agregar el producto al array con estado "activo"
+            usuario.dispositivos.push({ producto_id, estado: "activo" });
         }
 
         await usuario.save();
@@ -39,11 +39,13 @@ router.post("/agregar", async (req, res) => {
 // 📌 Obtener todos los productos agregados por un usuario
 router.get("/:usuario_id", async (req, res) => {
     try {
-        const usuario = await DispositivoUsuario.findById(req.params.usuario_id).populate("dispositivos.producto_id");
+        const usuario = await DispositivoUsuario.findOne({ usuario_id }).populate("dispositivos.producto_id");
 
         if (!usuario) return res.json([]);
 
-        res.json(usuario.dispositivos.filter(d => d.estado === "activo"));
+        // Filtrar solo dispositivos activos
+        const dispositivosActivos = usuario.dispositivos.filter(d => d.estado === "activo");
+        res.json(dispositivosActivos);
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al obtener productos" });
@@ -55,12 +57,24 @@ router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
     try {
         const { usuario_id, producto_id } = req.params;
 
-        await DispositivoUsuario.updateOne(
-            { _id: usuario_id, "dispositivos.producto_id": producto_id },
-            { $set: { "dispositivos.$.estado": "eliminado" } }
-        );
+        const usuario = await DispositivoUsuario.findOne({ usuario_id });
+
+        if (!usuario) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        // Buscar el dispositivo en el array y actualizar su estado
+        const dispositivo = usuario.dispositivos.find(d => d.producto_id.equals(producto_id));
+
+        if (!dispositivo) {
+            return res.status(404).json({ message: "Producto no encontrado" });
+        }
+
+        dispositivo.estado = "eliminado"; // Marcar como eliminado
+        await usuario.save();
 
         res.json({ message: "Producto eliminado con éxito" });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al eliminar producto" });
