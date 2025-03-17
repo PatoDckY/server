@@ -1,10 +1,19 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const DispositivoUsuario = require("../model/DispositivoUsuario");
 const router = express.Router();
 
 // 📌 Agregar un producto a la lista del usuario
 router.post("/agregar", async (req, res) => {
     const { usuario_id, producto_id } = req.body;
+
+    // Validar ObjectId
+    if (!mongoose.Types.ObjectId.isValid(usuario_id)) {
+        return res.status(400).json({ message: "ID de usuario no válido" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(producto_id)) {
+        return res.status(400).json({ message: "ID de producto no válido" });
+    }
 
     try {
         let usuario = await DispositivoUsuario.findOne({ usuario_id });
@@ -38,7 +47,12 @@ router.post("/agregar", async (req, res) => {
 
 // 📌 Obtener todos los productos agregados por un usuario
 router.get("/:usuario_id", async (req, res) => {
-    const { usuario_id } = req.params; // Aquí es donde corregí el uso de usuario_id
+    const { usuario_id } = req.params;
+
+    // Validar ObjectId
+    if (!mongoose.Types.ObjectId.isValid(usuario_id)) {
+        return res.status(400).json({ message: "ID de usuario no válido" });
+    }
 
     try {
         const usuario = await DispositivoUsuario.findOne({ usuario_id }).populate("dispositivos.producto_id");
@@ -57,6 +71,14 @@ router.get("/:usuario_id", async (req, res) => {
 // 📌 Eliminar un producto de la lista del usuario
 router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
     const { usuario_id, producto_id } = req.params;
+
+    // Validar ObjectId
+    if (!mongoose.Types.ObjectId.isValid(usuario_id)) {
+        return res.status(400).json({ message: "ID de usuario no válido" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(producto_id)) {
+        return res.status(400).json({ message: "ID de producto no válido" });
+    }
 
     try {
         const usuario = await DispositivoUsuario.findOne({ usuario_id });

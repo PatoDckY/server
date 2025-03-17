@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const DispositivoUsuarioSchema = new mongoose.Schema({
-    _id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario" }, // ID del usuario como clave única
+    usuario_id: { type: mongoose.Schema.Types.ObjectId, ref: "Usuario", required: true, unique: true }, // ID del usuario
     dispositivos: [
         {
             producto_id: { type: mongoose.Schema.Types.ObjectId, ref: "Producto", required: true },
@@ -12,4 +12,3 @@ const DispositivoUsuarioSchema = new mongoose.Schema({
 });
 
 module.exports = mongoose.model("DispositivoUsuario", DispositivoUsuarioSchema, "dispositivos_usuarios");
-
