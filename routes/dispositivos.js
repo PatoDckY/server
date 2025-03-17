@@ -168,7 +168,6 @@ router.get("/detalles/:producto_id", async (req, res) => {
     }
 
     try {
-        // Buscar el dispositivo en la base de datos
         const dispositivo = await DispositivoUsuario.aggregate([
             { $unwind: "$dispositivos" },
             { $match: { "dispositivos.producto_id": mongoose.Types.ObjectId(producto_id) } },
@@ -179,14 +178,15 @@ router.get("/detalles/:producto_id", async (req, res) => {
             return res.status(404).json({ message: "Dispositivo no encontrado" });
         }
 
-        // Devolver los detalles del dispositivo
+        // Responder con los datos del dispositivo
         res.json(dispositivo[0]);
 
     } catch (error) {
-        console.error(error);
+        console.error("Error al obtener detalles del dispositivo:", error);
         res.status(500).json({ message: "Error al obtener dispositivo" });
     }
 });
+
 
 
 
