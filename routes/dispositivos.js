@@ -38,6 +38,8 @@ router.post("/agregar", async (req, res) => {
 
 // 📌 Obtener todos los productos agregados por un usuario
 router.get("/:usuario_id", async (req, res) => {
+    const { usuario_id } = req.params; // Aquí es donde corregí el uso de usuario_id
+
     try {
         const usuario = await DispositivoUsuario.findOne({ usuario_id }).populate("dispositivos.producto_id");
 
@@ -54,9 +56,9 @@ router.get("/:usuario_id", async (req, res) => {
 
 // 📌 Eliminar un producto de la lista del usuario
 router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
-    try {
-        const { usuario_id, producto_id } = req.params;
+    const { usuario_id, producto_id } = req.params;
 
+    try {
         const usuario = await DispositivoUsuario.findOne({ usuario_id });
 
         if (!usuario) {
