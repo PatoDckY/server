@@ -78,7 +78,6 @@ router.get("/:usuario_id", async (req, res) => {
     }
 });
 
-// 📌 Eliminar un producto de la lista del usuario
 router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
     const { usuario_id, producto_id } = req.params;
 
@@ -97,14 +96,17 @@ router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
             return res.status(404).json({ message: "Usuario no encontrado" });
         }
 
-        // Buscar el dispositivo en el array y actualizar su estado
-        const dispositivo = usuario.dispositivos.find(d => d.producto_id.equals(producto_id));
+        // Buscar el índice del dispositivo en el array
+        const dispositivoIndex = usuario.dispositivos.findIndex(d => d.producto_id.equals(producto_id));
 
-        if (!dispositivo) {
+        if (dispositivoIndex === -1) {
             return res.status(404).json({ message: "Producto no encontrado" });
         }
 
-        dispositivo.estado = "eliminado"; // Marcar como eliminado
+        // Actualizar el estado del dispositivo a "eliminado" usando $set
+        usuario.dispositivos[dispositivoIndex].estado = "eliminado";
+        
+        // Guardar los cambios
         await usuario.save();
 
         res.json({ message: "Producto eliminado con éxito" });
