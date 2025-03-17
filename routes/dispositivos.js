@@ -79,8 +79,8 @@ router.get("/:usuario_id", async (req, res) => {
 });
 
 // 📌 Eliminar un producto de la lista de dispositivos del usuario
-router.put("/eliminar", async (req, res) => {
-    const { usuario_id, producto_id } = req.body;
+router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
+    const { usuario_id, producto_id } = req.params;
 
     // Validar ObjectId
     if (!mongoose.Types.ObjectId.isValid(usuario_id)) {
