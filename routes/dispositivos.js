@@ -90,31 +90,27 @@ router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
     }
 
     try {
-        const usuario = await DispositivoUsuario.findOne({ usuario_id });
+        // Usar updateOne con $set y $elemMatch para actualizar el estado del producto específico
+        const result = await DispositivoUsuario.updateOne(
+            { 
+                usuario_id, 
+                "dispositivos.producto_id": mongoose.Types.ObjectId(producto_id) 
+            },
+            { 
+                $set: { "dispositivos.$.estado": "eliminado" } 
+            }
+        );
 
-        if (!usuario) {
-            return res.status(404).json({ message: "Usuario no encontrado" });
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ message: "Producto no encontrado o ya eliminado" });
         }
-
-        // Buscar el índice del dispositivo en el array
-        const dispositivoIndex = usuario.dispositivos.findIndex(d => d.producto_id.equals(producto_id));
-
-        if (dispositivoIndex === -1) {
-            return res.status(404).json({ message: "Producto no encontrado" });
-        }
-
-        // Actualizar el estado del dispositivo a "eliminado" usando $set
-        usuario.dispositivos[dispositivoIndex].estado = "eliminado";
-        
-        // Guardar los cambios
-        await usuario.save();
 
         res.json({ message: "Producto eliminado con éxito" });
-
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al eliminar producto" });
     }
 });
+
 
 module.exports = router;
