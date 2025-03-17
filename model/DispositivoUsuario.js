@@ -11,4 +11,5 @@ const DispositivoUsuarioSchema = new mongoose.Schema({
     ]
 });
 
-module.exports = mongoose.model("DispositivoUsuario", DispositivoUsuarioSchema);
+module.exports = mongoose.model("DispositivoUsuario", DispositivoUsuarioSchema, "dispositivos-usuarios");
+
