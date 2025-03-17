@@ -78,8 +78,9 @@ router.get("/:usuario_id", async (req, res) => {
     }
 });
 
-router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
-    const { usuario_id, producto_id } = req.params;
+// 📌 Eliminar un producto de la lista de dispositivos del usuario
+router.put("/eliminar", async (req, res) => {
+    const { usuario_id, producto_id } = req.body;
 
     // Validar ObjectId
     if (!mongoose.Types.ObjectId.isValid(usuario_id)) {
@@ -90,22 +91,26 @@ router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
     }
 
     try {
-        // Usar updateOne con $set y $elemMatch para actualizar el estado del producto específico
-        const result = await DispositivoUsuario.updateOne(
-            { 
-                usuario_id, 
-                "dispositivos.producto_id": mongoose.Types.ObjectId(producto_id) 
-            },
-            { 
-                $set: { "dispositivos.$.estado": "eliminado" } 
-            }
-        );
+        const usuario = await DispositivoUsuario.findOne({ usuario_id });
 
-        if (result.modifiedCount === 0) {
+        if (!usuario) {
+            return res.status(404).json({ message: "Usuario no encontrado" });
+        }
+
+        // Buscar el dispositivo dentro del array de dispositivos
+        const dispositivoIndex = usuario.dispositivos.findIndex(d => d.producto_id.equals(producto_id) && d.estado === "activo");
+
+        if (dispositivoIndex === -1) {
             return res.status(404).json({ message: "Producto no encontrado o ya eliminado" });
         }
 
+        // Marcar el dispositivo como eliminado
+        usuario.dispositivos[dispositivoIndex].estado = "eliminado";
+
+        // Guardar los cambios
+        await usuario.save();
         res.json({ message: "Producto eliminado con éxito" });
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Error al eliminar producto" });
