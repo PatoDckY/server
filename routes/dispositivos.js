@@ -4,25 +4,44 @@ const DispositivoUsuario = require("../model/DispositivoUsuario");
 const router = express.Router();
 
 // 📌 Agregar un producto a la lista del usuario
-router.get("/:usuario_id", async (req, res) => {
-    const { usuario_id } = req.params;
+router.post("/agregar", async (req, res) => {
+    const { usuario_id, producto_id } = req.body;
 
     // Validar ObjectId
     if (!mongoose.Types.ObjectId.isValid(usuario_id)) {
         return res.status(400).json({ message: "ID de usuario no válido" });
     }
+    if (!mongoose.Types.ObjectId.isValid(producto_id)) {
+        return res.status(400).json({ message: "ID de producto no válido" });
+    }
 
     try {
-        const usuario = await DispositivoUsuario.findOne({ usuario_id }).populate("dispositivos.producto_id");
+        let usuario = await DispositivoUsuario.findOne({ usuario_id });
 
-        if (!usuario) return res.json([]);
+        if (!usuario) {
+            // Si no existe, creamos un nuevo documento para el usuario con el primer dispositivo
+            usuario = new DispositivoUsuario({
+                usuario_id,
+                dispositivos: [{ producto_id, estado: "activo" }]
+            });
+        } else {
+            // Verificar si el producto ya está agregado y activo
+            const existe = usuario.dispositivos.some(d => d.producto_id.equals(producto_id) && d.estado === "activo");
 
-        // Filtrar solo dispositivos activos
-        const dispositivosActivos = usuario.dispositivos.filter(d => d.estado === "activo");
-        res.json(dispositivosActivos);
+            if (existe) {
+                return res.status(400).json({ message: "El producto ya está agregado" });
+            }
+
+            // Agregar el producto al array con estado "activo"
+            usuario.dispositivos.push({ producto_id, estado: "activo" });
+        }
+
+        await usuario.save();
+        res.json({ message: "Producto agregado con éxito" });
+
     } catch (error) {
         console.error(error);
-        res.status(500).json({ message: "Error al obtener productos" });
+        res.status(500).json({ message: "Error al agregar producto" });
     }
 });
 
@@ -85,82 +104,5 @@ router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
         res.status(500).json({ message: "Error al eliminar producto" });
     }
 });
-// 📌 Actualizar nombre e IP de un dispositivo
-router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
-    const { usuario_id, producto_id } = req.params;
-    const { nombre, ip } = req.body;
-
-    // Validar ObjectId
-    if (!mongoose.Types.ObjectId.isValid(usuario_id)) {
-        return res.status(400).json({ message: "ID de usuario no válido" });
-    }
-    if (!mongoose.Types.ObjectId.isValid(producto_id)) {
-        return res.status(400).json({ message: "ID de producto no válido" });
-    }
-
-    try {
-        const usuario = await DispositivoUsuario.findOne({ usuario_id });
-
-        if (!usuario) {
-            return res.status(404).json({ message: "Usuario no encontrado" });
-        }
-
-        // Buscar el dispositivo en el array y actualizar nombre e ip
-        const dispositivo = usuario.dispositivos.find(d => d.producto_id.equals(producto_id));
-
-        if (!dispositivo) {
-            return res.status(404).json({ message: "Producto no encontrado" });
-        }
-
-        // Actualizar los campos nombre e ip
-        dispositivo.nombre = nombre || dispositivo.nombre; // Si no se pasa un nombre, mantiene el valor actual
-        dispositivo.ip = ip || dispositivo.ip; // Lo mismo para la IP
-
-        await usuario.save();
-        res.json({ message: "Producto actualizado con éxito" });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al actualizar producto" });
-    }
-});
-// 📌 Actualizar nombre e IP de un dispositivo
-router.put("/actualizar/:producto_id", async (req, res) => {
-    const { producto_id } = req.params;
-    const { nombre, ip } = req.body;
-
-    if (!mongoose.Types.ObjectId.isValid(producto_id)) {
-        return res.status(400).json({ message: "ID de producto no válido" });
-    }
-
-    try {
-        // Buscar el usuario que contiene el dispositivo
-        const usuario = await DispositivoUsuario.findOne({ "dispositivos.producto_id": producto_id });
-
-        if (!usuario) {
-            return res.status(404).json({ message: "Usuario o dispositivo no encontrado" });
-        }
-
-        // Buscar el dispositivo en el array
-        const dispositivo = usuario.dispositivos.find(d => d.producto_id.equals(producto_id));
-
-        if (!dispositivo) {
-            return res.status(404).json({ message: "Dispositivo no encontrado" });
-        }
-
-        // Actualizar los campos nombre e ip
-        dispositivo.nombre = nombre || dispositivo.nombre;
-        dispositivo.ip = ip || dispositivo.ip;
-
-        await usuario.save();
-        res.json({ message: "Dispositivo actualizado con éxito" });
-
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: "Error al actualizar dispositivo" });
-    }
-});
-
-
 
 module.exports = router;
