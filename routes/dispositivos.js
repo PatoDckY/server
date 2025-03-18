@@ -118,4 +118,43 @@ router.delete("/eliminar/:usuario_id/:producto_id", async (req, res) => {
 });
 
 
+// 📌 Obtener un producto específico de un usuario por usuario_id y producto_id
+router.get("/:usuario_id/:producto_id", async (req, res) => {
+    const { usuario_id, producto_id } = req.params;
+
+    // Validar ObjectId
+    if (!mongoose.Types.ObjectId.isValid(usuario_id)) {
+        return res.status(400).json({ message: "ID de usuario no válido" });
+    }
+    if (!mongoose.Types.ObjectId.isValid(producto_id)) {
+        return res.status(400).json({ message: "ID de producto no válido" });
+    }
+
+    try {
+        // Buscar al usuario y su dispositivo con el producto_id especificado
+        const usuario = await DispositivoUsuario.findOne({
+            usuario_id,
+            "dispositivos.producto_id": mongoose.Types.ObjectId(producto_id)
+        }).populate("dispositivos.producto_id");
+
+        if (!usuario) {
+            return res.status(404).json({ message: "Usuario o producto no encontrado" });
+        }
+
+        // Buscar el dispositivo con el producto_id específico
+        const dispositivo = usuario.dispositivos.find(d => d.producto_id.equals(producto_id));
+
+        if (!dispositivo) {
+            return res.status(404).json({ message: "Producto no encontrado en los dispositivos del usuario" });
+        }
+
+        // Solo devolver los datos del producto
+        res.json(dispositivo);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Error al obtener el producto" });
+    }
+});
+
+
 module.exports = router;
