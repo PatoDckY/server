@@ -39,7 +39,7 @@ router.post("/", async (req, res) => {
 // Obtener una pregunta por su ID
 router.get("/:id", async (req, res) => {
   try {
-    const pregunta = await PreguntaRecuperacion.findById(req.params._id);
+    const pregunta = await PreguntaRecuperacion.findById(req.params.id);
 
     if (!pregunta) {
       return res.status(404).json({ message: "Pregunta de recuperación no encontrada" });
