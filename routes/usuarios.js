@@ -217,4 +217,54 @@ router.post("/:id/cambiar-password", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+// Ruta para obtener la pregunta de recuperación
+router.get("/recuperar-password/:email", async (req, res) => {
+  try {
+    const usuario = await Usuario.findOne({ email: req.params.email });
+
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // Traer la pregunta asociada al usuario
+    const pregunta = usuario.pregunta_recuperacion;
+    if (!pregunta || !pregunta.preg_id) {
+      return res.status(400).json({ message: "El usuario no tiene una pregunta de recuperación asociada" });
+    }
+
+    // Obtener la pregunta de la colección de preguntas
+    const preguntaRecuperacion = await PreguntaRecuperacion.findById(pregunta.preg_id);
+    if (!preguntaRecuperacion) {
+      return res.status(404).json({ message: "Pregunta de recuperación no encontrada" });
+    }
+
+    res.json({ pregunta: preguntaRecuperacion.pregunta });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+// Ruta para validar la respuesta de recuperación
+router.post("/validar-respuesta/:email", async (req, res) => {
+  try {
+    const { respuesta } = req.body;
+    const usuario = await Usuario.findOne({ email: req.params.email });
+
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    // Validar la respuesta
+    if (usuario.pregunta_recuperacion.respuesta !== respuesta) {
+      return res.status(400).json({ message: "Respuesta incorrecta" });
+    }
+
+    res.status(200).json({ message: "Respuesta correcta. Ahora puedes cambiar tu contraseña." });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;
