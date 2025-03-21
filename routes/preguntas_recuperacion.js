@@ -45,12 +45,11 @@ router.get("/:id", async (req, res) => {
       return res.status(404).json({ message: "Pregunta de recuperación no encontrada" });
     }
 
-    res.status(200).json({ pregunta: pregunta.pregunta }); // Devolver solo la pregunta
+    res.status(200).json(pregunta); // Devolver la pregunta encontrada en formato JSON
   } catch (error) {
     res.status(500).json({ error: error.message }); // Manejar errores
   }
 });
-
 
 
 module.exports = router;
