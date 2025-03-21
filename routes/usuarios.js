@@ -233,17 +233,13 @@ router.get("/recuperar-password/:email", async (req, res) => {
       return res.status(400).json({ message: "El usuario no tiene una pregunta de recuperación asociada" });
     }
 
-    // Obtener la pregunta de la colección de preguntas
-    const preguntaRecuperacion = await PreguntaRecuperacion.findById(pregunta.preg_id);
-    if (!preguntaRecuperacion) {
-      return res.status(404).json({ message: "Pregunta de recuperación no encontrada" });
-    }
-
-    res.json({ pregunta: preguntaRecuperacion.pregunta });
+    // En lugar de obtener el texto de la pregunta, simplemente retornamos el preg_id
+    res.json({ preg_id: pregunta.preg_id });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
 });
+
 
 
 // Ruta para validar la respuesta de recuperación
