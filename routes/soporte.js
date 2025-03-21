@@ -49,4 +49,29 @@ router.delete("/:id", async (req, res) => {
   }
 });
 
+// Agregar una nueva pregunta a una categoría de soporte existente
+router.post("/:id/pregunta", async (req, res) => {
+  try {
+    const soporte = await Soporte.findById(req.params.id);
+    if (!soporte) {
+      return res.status(404).json({ message: "Categoría de soporte no encontrada" });
+    }
+
+    // Crear una nueva pregunta con los datos enviados en el cuerpo de la solicitud
+    const nuevaPregunta = {
+      pregunta: req.body.pregunta,
+      respuesta: req.body.respuesta,
+    };
+
+    // Agregar la nueva pregunta al array de preguntas de la categoría
+    soporte.preguntas.push(nuevaPregunta);
+    await soporte.save();
+
+    res.status(201).json(soporte);
+  } catch (error) {
+    res.status(500).json({ message: "Error al agregar la pregunta" });
+  }
+});
+
+
 module.exports = router;

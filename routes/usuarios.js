@@ -192,4 +192,29 @@ router.put("/cambiar-rol/:id", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+// Cambiar contraseña
+router.post("/:id/cambiar-password", async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const usuario = await Usuario.findById(req.params.id);
+
+    if (!usuario) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const passwordMatch = await bcrypt.compare(currentPassword, usuario.contraseña);
+    if (!passwordMatch) {
+      return res.status(400).json({ error: "La contraseña actual es incorrecta." });
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    usuario.contraseña = await bcrypt.hash(newPassword, salt);
+    await usuario.save();
+
+    res.status(200).json({ message: "Contraseña cambiada exitosamente." });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 module.exports = router;
