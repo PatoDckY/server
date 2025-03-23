@@ -6,7 +6,7 @@ const nosotrosRoutes = require("./routes/nosotrosR"); // Importar las rutas de N
 const PecesRoutes = require("./routes/peces");
 const UsuariosRoutes = require("./routes/usuarios");
 const preguntasRecuperacionRoutes = require("./routes/preguntas_recuperacion");
-const servoRoutes = require("./routes/servoRoutes"); // Importar las rutas del servo y sensores
+const IotRoutes = require("./routes/datosPecera"); // Importar las rutas del servo y sensores
 const ContactoRoutes = require("./routes/contacto");
 const SoporteRoutes = require("./routes/soporte");
 const GuiaRoutes = require("./routes/guia");
@@ -28,7 +28,7 @@ app.use("/nosotros", nosotrosRoutes);
 app.use("/peces", PecesRoutes);
 app.use("/usuarios", UsuariosRoutes);
 app.use("/preguntas", preguntasRecuperacionRoutes);
-app.use("/servo", servoRoutes); // Usar las rutas del servo y sensores
+app.use("/Iot", IotRoutes); // Usar las rutas del servo y sensores
 app.use("/contacto", ContactoRoutes);
 app.use("/soporte", SoporteRoutes);
 app.use("/guia", GuiaRoutes);
