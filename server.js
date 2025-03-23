@@ -12,6 +12,7 @@ const SoporteRoutes = require("./routes/soporte");
 const GuiaRoutes = require("./routes/guia");
 const busqueda = require("./routes/busqueda");
 const dispositivos = require("./routes/dispositivos");
+const pecera = require("./routes/pecera");
 
 const app = express();
 
@@ -34,6 +35,7 @@ app.use("/soporte", SoporteRoutes);
 app.use("/guia", GuiaRoutes);
 app.use("/buscar", busqueda);
 app.use("/dispositivos", dispositivos);
+app.use("/pecera", pecera);
 
 // Export the app for Vercel
 module.exports = app;
