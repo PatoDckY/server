@@ -185,14 +185,18 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
     }
 });
 
-router.get("/todos", async (req, res) => {
+router.get("/", async (req, res) => {
     try {
         const usuarios = await DispositivoUsuario.find()
-            .populate("usuario_id") // Obtener detalles del usuario
-            .populate("dispositivos.producto_id"); // Obtener detalles del producto
-
-        res.json(usuarios);
+        .populate("usuario_id")
+        .populate({
+            path: "dispositivos.producto_id",
+            match: { estado: "activo" } // Solo dispositivos activos
+        });    
     } catch (error) {
+        if (!usuarios.length) {
+            return res.status(404).json({ message: "No hay usuarios con dispositivos" });
+        }        
         console.error(error);
         res.status(500).json({ message: "Error al obtener los usuarios y dispositivos" });
     }
