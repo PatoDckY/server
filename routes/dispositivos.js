@@ -185,7 +185,7 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
     }
 });
 
-router.get("/", async (req, res) => {
+router.get("/disp", async (req, res) => {
     try {
         const usuarios = await DispositivoUsuario.find()
         .populate("usuario_id")
