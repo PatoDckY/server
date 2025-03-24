@@ -12,20 +12,36 @@ router.get("/", async (req, res) => {
   }
 });
 
-// Agregar una nueva categoría de soporte con preguntas
+// Agregar una nueva categoría de soporte con preguntas, o agregar la pregunta a una categoría existente
 router.post("/", async (req, res) => {
   try {
+    // Verificar si la categoría ya existe
+    const categoriaExistente = await Soporte.findOne({ categoria: req.body.categoria });
+    
+    if (categoriaExistente) {
+      // Si la categoría ya existe, solo agregar la nueva pregunta
+      const nuevaPregunta = {
+        pregunta: req.body.preguntas[0].pregunta,
+        respuesta: "",
+      };
+      
+      categoriaExistente.preguntas.push(nuevaPregunta);
+      await categoriaExistente.save();
+      return res.status(201).json(categoriaExistente); // Retornar la categoría actualizada
+    }
+
+    // Si la categoría no existe, crear una nueva categoría con la pregunta
     const nuevoSoporte = new Soporte({
-      categoria: req.body.categoria, // Asegúrate de enviar "categoria"
-      preguntas: req.body.preguntas, // Agregar preguntas vacías con respuesta vacía
+      categoria: req.body.categoria,
+      preguntas: req.body.preguntas, // Se pasa directamente el array de preguntas
     });
+
     await nuevoSoporte.save();
     res.status(201).json(nuevoSoporte);
   } catch (error) {
     res.status(500).json({ message: "Error al agregar la información de soporte" });
   }
 });
-
 
 // Actualizar una categoría de soporte por ID
 router.put("/:id", async (req, res) => {
@@ -76,6 +92,5 @@ router.post("/:id/pregunta", async (req, res) => {
     res.status(500).json({ message: "Error al agregar la pregunta" });
   }
 });
-
 
 module.exports = router;
