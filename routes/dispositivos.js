@@ -184,31 +184,12 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
     }
 });
 
-router.get("/todos", async (req, res) => {
+app.get("/dispositivos-usuarios", async (req, res) => {
     try {
-        const dispositivosUsuarios = await DispositivoUsuario.find()
-            .populate("usuario_id", "nombre apellidoP apellidoM telefono email sexo edad rol")
-            .populate({
-                path: "dispositivos.producto_id",
-                select: "nombre",
-                match: { estado: "activo" }
-            });
-
-        if (!dispositivosUsuarios || dispositivosUsuarios.length === 0) {
-            return res.status(404).json({ message: "No hay registros disponibles" });
-        }
-
-        // Verificamos si los usuario_id son válidos
-        dispositivosUsuarios.forEach((doc) => {
-            if (!mongoose.Types.ObjectId.isValid(doc.usuario_id)) {
-                return res.status(400).json({ message: "ID de usuario no válido" });
-            }
-        });
-
-        res.json(dispositivosUsuarios);
+        const dispositivosUsuarios = await DispositivoUsuario.find({});
+        res.status(200).json(dispositivosUsuarios);
     } catch (error) {
-        console.error("Error al obtener los dispositivos y usuarios:", error);
-        res.status(500).json({ message: "Error interno del servidor", error });
+        res.status(500).json({ message: "Error al obtener los dispositivos de los usuarios", error });
     }
 });
 
