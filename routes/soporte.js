@@ -15,13 +15,17 @@ router.get("/", async (req, res) => {
 // Agregar una nueva categoría de soporte con preguntas
 router.post("/", async (req, res) => {
   try {
-    const nuevoSoporte = new Soporte(req.body);
+    const nuevoSoporte = new Soporte({
+      categoria: req.body.categoria, // Asegúrate de enviar "categoria"
+      preguntas: req.body.preguntas, // Agregar preguntas vacías con respuesta vacía
+    });
     await nuevoSoporte.save();
     res.status(201).json(nuevoSoporte);
   } catch (error) {
     res.status(500).json({ message: "Error al agregar la información de soporte" });
   }
 });
+
 
 // Actualizar una categoría de soporte por ID
 router.put("/:id", async (req, res) => {

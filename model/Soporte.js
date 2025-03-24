@@ -14,7 +14,7 @@ const SoporteSchema = new mongoose.Schema({
       },
       respuesta: {
         type: String,
-        required: true,
+        required: false,  // Ahora es opcional
       },
     },
   ],
