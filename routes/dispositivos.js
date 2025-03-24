@@ -184,21 +184,22 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
     }
 });
 
-router.get("/dispositivos", async (req, res) => {
+router.get("/disp", async (req, res) => {
     try {
         const usuarios = await DispositivoUsuario.find()
-            .populate("usuario_id")
-            .populate("dispositivos.producto_id"); // No uses `match` aquí, ya que `estado` no está en `producto_id`
+            .populate("usuario_id") // Trae los datos del usuario
+            .populate("dispositivos.producto_id"); // Trae los datos del producto
 
-        if (usuarios.length === 0) {
+        if (!usuarios || usuarios.length === 0) {
             return res.status(404).json({ message: "No hay usuarios con dispositivos" });
         }
 
         res.json(usuarios);
     } catch (error) {
-        console.error(error);
+        console.error("Error en la consulta:", error);
         res.status(500).json({ message: "Error al obtener los usuarios y dispositivos" });
     }
 });
+
 
 module.exports = router;
