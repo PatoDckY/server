@@ -186,7 +186,7 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
 
 router.get("/dispositivos-usuarios", async (req, res) => {
     try {
-        const dispositivosUsuarios = await DispositivoUsuario.find({});
+        const dispositivosUsuarios = await DispositivoUsuario.find();
         res.status(200).json(dispositivosUsuarios);
     } catch (error) {
         res.status(500).json({ message: "Error al obtener los dispositivos de los usuarios", error });
