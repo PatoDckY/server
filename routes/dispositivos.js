@@ -187,13 +187,6 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
 router.get("/todos", async (req, res) => {
     try {
         const dispositivosUsuarios = await DispositivoUsuario.find()
-            .populate("usuario_id") // Obtener datos del usuario
-            .populate("dispositivos.producto_id"); // Obtener datos de los productos
-
-        if (!dispositivosUsuarios || dispositivosUsuarios.length === 0) {
-            return res.status(404).json({ message: "No hay registros disponibles" });
-        }
-
         res.json(dispositivosUsuarios);
     } catch (error) {
         console.error("Error al obtener los dispositivos y usuarios:", error);
