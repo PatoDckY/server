@@ -187,9 +187,17 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
 app.get("/dispositivos-usuarios", async (req, res) => {
     try {
         const dispositivosUsuarios = await DispositivoUsuario.find({});
+        if (!dispositivosUsuarios) {
+            return res.status(404).json({ message: "No se encontraron dispositivos de usuarios" });
+        }
         res.status(200).json(dispositivosUsuarios);
     } catch (error) {
-        res.status(500).json({ message: "Error al obtener los dispositivos de los usuarios", error });
+        console.error("Error en la consulta:", error);
+        res.status(500).json({
+            message: "Error al obtener los dispositivos de los usuarios",
+            error: error.message, // Envía solo el mensaje de error
+            stack: process.env.NODE_ENV === "development" ? error.stack : undefined, // Solo en desarrollo
+        });
     }
 });
 
