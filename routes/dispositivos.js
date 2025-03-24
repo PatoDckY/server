@@ -184,24 +184,12 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
     }
 });
 
-// routes/dispositivos.js
 router.get("/dispositivos-usuarios", async (req, res) => {
     try {
-        console.log("Intentando obtener dispositivos de usuarios...");
-
-        // Busca solo documentos con un usuario_id válido
-        const dispositivosUsuarios = await DispositivoUsuario.find({
-            usuario_id: { $exists: true, $type: "objectId" } // Filtra por ObjectId válido
-        });
-
-        console.log("Documentos encontrados:", dispositivosUsuarios);
+        const dispositivosUsuarios = await DispositivoUsuario.find({});
         res.status(200).json(dispositivosUsuarios);
     } catch (error) {
-        console.error("Error en la consulta:", error);
-        res.status(500).json({
-            message: "Error al obtener los dispositivos de los usuarios",
-            error: error.message,
-        });
+        res.status(500).json({ message: "Error al obtener los dispositivos de los usuarios", error });
     }
 });
 
