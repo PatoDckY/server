@@ -184,7 +184,7 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
     }
 });
 
-app.get("/dispositivos-usuarios", async (req, res) => {
+router.get("/dispositivos-usuarios", async (req, res) => {
     try {
         const dispositivosUsuarios = await DispositivoUsuario.find({});
         if (!dispositivosUsuarios) {
