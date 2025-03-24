@@ -187,16 +187,23 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
 router.get("/todos", async (req, res) => {
     try {
         const dispositivosUsuarios = await DispositivoUsuario.find()
-        .populate("usuario_id", "nombre") // Populate para el usuario con solo el campo 'nombre'
-        .populate({
-            path: "dispositivos.producto_id",
-            select: "nombre", // Solo seleccionamos el nombre del producto
-            match: { estado: "activo" } // Filtramos solo los productos activos
-        });
+            .populate("usuario_id", "nombre apellidoP apellidoM telefono email sexo edad rol")
+            .populate({
+                path: "dispositivos.producto_id",
+                select: "nombre",
+                match: { estado: "activo" }
+            });
 
-        if (!dispositivosUsuarios.length) {
+        if (!dispositivosUsuarios || dispositivosUsuarios.length === 0) {
             return res.status(404).json({ message: "No hay registros disponibles" });
         }
+
+        // Verificamos si los usuario_id son válidos
+        dispositivosUsuarios.forEach((doc) => {
+            if (!mongoose.Types.ObjectId.isValid(doc.usuario_id)) {
+                return res.status(400).json({ message: "ID de usuario no válido" });
+            }
+        });
 
         res.json(dispositivosUsuarios);
     } catch (error) {
