@@ -187,14 +187,12 @@ router.put("/actualizar/:usuario_id/:producto_id", async (req, res) => {
 router.get("/todos", async (req, res) => {
     try {
         const dispositivosUsuarios = await DispositivoUsuario.find()
-            .populate({
-                path: "usuario_id",
-                select: "nombre correo" // Ajusta los campos según tu modelo de Usuario
-            })
-            .populate({
-                path: "dispositivos.producto_id",
-                select: "nombre descripcion" // Ajusta los campos según tu modelo de Producto
-            });
+        .populate("usuario_id", "nombre") // Populate para el usuario con solo el campo 'nombre'
+        .populate({
+            path: "dispositivos.producto_id",
+            select: "nombre", // Solo seleccionamos el nombre del producto
+            match: { estado: "activo" } // Filtramos solo los productos activos
+        });
 
         if (!dispositivosUsuarios.length) {
             return res.status(404).json({ message: "No hay registros disponibles" });
@@ -206,5 +204,6 @@ router.get("/todos", async (req, res) => {
         res.status(500).json({ message: "Error interno del servidor", error });
     }
 });
+
 
 module.exports = router;
